@@ -1,0 +1,242 @@
+ <style>
+    .calendar-part{
+	border: 1px solid #000;
+      background-color: #fff;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+	  padding: 5px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+	}
+     .calendar-header {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .calendar-header select, .btn-calendar {
+      padding: 5px 8px;
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      background: white;
+      color: #212529;
+    }
+    table {
+      width: 100%;
+      text-align: center;
+      transition: all 0.3s ease;
+      color: #212529;
+    }
+    th, td {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .today {
+    background-color: #0d6efd !important; /* Bootstrap primary color */
+    color: white !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px #0d6efd !important;
+    transform: scale(1.1) !important;
+    transition: all 0.3s ease !important;
+  }
+   .weekend {
+    background-color: #f8d7da;
+    border: #dee2e6 2px solid;
+}
+    .fade {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    .fade.show {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.3s ease-in-out;
+    }
+	.ess-login {
+      border: 2px solid #000;
+      border-radius: 30px;
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .announcment-part {
+      border: 1px solid #000;
+      background-color: #fff;
+      padding: 20px;
+	  margin-top: 74px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+  </style>
+
+<div class="ess-login bg-white mb-5">ESS Login</div>
+<div class="ess-login bg-white mb-5">HR Login</div>
+        <div class="announcment-part">Announcement
+		<p>&nbsp;</p>
+		</div>
+		<div>
+		<p><a href="#" class="text-dark text-decoration-none">ELICO Logo Guidlines</p>
+		</div>
+ <div class="calendar-part">
+    <div class="calendar-header">
+      <button class="btn-calendar" id="prevMonth">&laquo;</button>
+      <select id="monthSelect"></select>
+      <select id="yearSelect"></select>
+      <button class="btn-calendar" id="nextMonth">&raquo;</button>
+    </div>
+
+    <h6 class="text-center mb-3" id="currentDate"></h6>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody id="calendarBody" class="fade show">
+        <!-- Calendar will be built here -->
+      </tbody>
+    </table>
+  </div>
+  
+ <script>
+  const today = new Date();
+  let currentMonth = today.getMonth();
+  let currentYear = today.getFullYear();
+
+  const monthSelect = document.getElementById('monthSelect');
+  const yearSelect = document.getElementById('yearSelect');
+  const calendarBody = document.getElementById('calendarBody');
+  const currentDate = document.getElementById('currentDate');
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Example Events
+  const events = {
+    "2025-04-15": "Team Meeting 📅",
+    "2025-04-27": "Project Deadline 🚀",
+    "2025-05-10": "Birthday Party 🎉"
+  };
+
+  function populateSelectors() {
+    months.forEach((month, idx) => {
+      const option = document.createElement('option');
+      option.value = idx;
+      option.text = month;
+      monthSelect.appendChild(option);
+    });
+
+    for (let y = today.getFullYear() - 50; y <= today.getFullYear() + 50; y++) {
+      const option = document.createElement('option');
+      option.value = y;
+      option.text = y;
+      yearSelect.appendChild(option);
+    }
+  }
+
+  monthSelect.addEventListener('change', () => {
+    currentMonth = parseInt(monthSelect.value);
+    generateCalendar(currentMonth, currentYear);
+  });
+
+  yearSelect.addEventListener('change', () => {
+    currentYear = parseInt(yearSelect.value);
+    generateCalendar(currentMonth, currentYear);
+  });
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    generateCalendar(currentMonth, currentYear);
+  });
+
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    generateCalendar(currentMonth, currentYear);
+  });
+
+  function generateCalendar(month, year) {
+    calendarBody.classList.remove('show');
+    setTimeout(() => {
+      calendarBody.innerHTML = '';
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      monthSelect.value = month;
+      yearSelect.value = year;
+
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      currentDate.innerText = today.toLocaleDateString('en-US', options);
+
+      let date = 1;
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement('tr');
+
+        for (let j = 0; j < 7; j++) {
+          const cell = document.createElement('td');
+
+          if (i === 0 && j < firstDay) {
+            cell.innerHTML = '';
+          } else if (date > daysInMonth) {
+            break;
+          } else {
+            cell.innerHTML = date;
+            const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+
+            if (date === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+              cell.classList.add('today');
+            }
+
+            if (j === 0 || j === 6) {
+              cell.classList.add('weekend');
+            }
+
+            // Click on Date to show Event
+            cell.addEventListener('click', () => {
+              if (events[fullDate]) {
+                alert(`📌 ${fullDate}: ${events[fullDate]}`);
+              } else {
+                alert(`📅 ${fullDate}: No Events`);
+              }
+            });
+
+            date++;
+          }
+          row.appendChild(cell);
+        }
+        calendarBody.appendChild(row);
+      }
+
+      setTimeout(() => {
+        calendarBody.classList.add('show');
+      }, 50);
+
+    }, 300);
+  }
+
+  populateSelectors();
+  generateCalendar(currentMonth, currentYear);
+</script>
